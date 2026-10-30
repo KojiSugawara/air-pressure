@@ -20,7 +20,7 @@
     --panel: #F5F7F8;
     --ink: #14202B;
     --muted: #5B6773;
-    --tick: #9AA6B0;
+    --line: #C6CDD3;
     --teal: #0E7C86;
     --sans: "Barlow", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
     --cond: "Barlow Condensed", "Barlow", "Hiragino Sans", system-ui, sans-serif;
@@ -31,92 +31,115 @@
   body {
     margin: 0;
     min-height: 100vh;
-    display: grid;
-    place-items: center;
-    padding: max(32px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    padding: max(20px, env(safe-area-inset-top)) 12px max(32px, env(safe-area-inset-bottom));
     background: var(--alu);
     color: var(--ink);
     font-family: var(--sans);
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
   }
 
-  .tool {
-    width: 100%;
-    max-width: 440px;
+  main {
+    max-width: 460px;
+    margin: 0 auto;
+    display: grid;
+    gap: 16px;
+  }
+
+  .card {
     background: var(--panel);
-    border-radius: 6px;
-    border: 1px solid #C6CDD3;
+    border-radius: 8px;
+    border: 1px solid var(--line);
     box-shadow: 0 1px 0 #fff inset, 0 18px 40px -24px rgba(20, 32, 43, 0.45);
-    padding: 28px 28px 32px;
+    padding: 22px 20px 24px;
   }
 
   h1 {
-    margin: 0 0 20px;
+    margin: 0 0 16px;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+  h2 {
+    margin: 0 0 14px;
     font-size: 1.25rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
   }
 
-  /* 変換タイプ */
-  .type {
-    position: relative;
+  .label {
+    display: block;
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 0 0 6px;
   }
-  .type select {
-    width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-    font: 500 1.0625rem var(--sans);
+
+  /* 大きいボタンの並び */
+  .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 6px;
+  }
+  .seg button {
+    min-height: 54px;
+    font: 600 1.25rem var(--cond);
     color: var(--ink);
     background: #fff;
-    border: 1px solid #C6CDD3;
-    border-radius: 4px;
-    padding: 12px 44px 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0 4px;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
-  .type::after {
-    content: "";
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid var(--ink);
-    border-bottom: 2px solid var(--ink);
-    transform: translateY(-70%) rotate(45deg);
-    pointer-events: none;
+  .seg button[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
   }
 
-  /* 入力・結果の行 */
-  .row {
-    margin-top: 28px;
+  .unit-row { margin-top: 14px; }
+  .swap-row {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 0;
   }
+  .swap {
+    min-height: 44px;
+    padding: 0 18px;
+    font: 500 1rem var(--sans);
+    color: var(--teal);
+    background: transparent;
+    border: 1px solid var(--teal);
+    border-radius: 22px;
+    cursor: pointer;
+  }
+
+  .row { margin-top: 22px; }
   .row-head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--muted);
   }
   .unit {
     font-family: var(--cond);
     font-weight: 600;
-    font-size: 1.125rem;
+    font-size: 1.375rem;
     color: var(--ink);
   }
 
   .figure {
     display: block;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 2px;
     font-family: var(--cond);
     font-weight: 500;
-    font-size: clamp(2.75rem, 12vw, 3.75rem);
+    font-size: clamp(3.25rem, 15vw, 4.25rem);
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
     color: var(--ink);
   }
-
   input.figure {
     background: transparent;
     border: 0;
@@ -136,61 +159,166 @@
 
   .hint {
     margin: 6px 0 0;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--muted);
     min-height: 1.5em;
   }
   .hint.error { color: #B3261E; }
 
-  /* 他の単位 */
   .others {
-    margin: 28px 0 0;
-    padding: 16px 0 0;
-    border-top: 1px solid #C6CDD3;
+    margin: 18px 0 0;
+    padding: 14px 0 0;
+    border-top: 1px solid var(--line);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px 16px;
+    gap: 10px 16px;
   }
   .others div { display: flex; flex-direction: column; }
-  .others dt {
-    font-size: 0.8125rem;
-    color: var(--muted);
-  }
+  .others dt { font-size: 0.9375rem; color: var(--muted); }
   .others dd {
     margin: 0;
     font-family: var(--cond);
     font-weight: 500;
-    font-size: 1.375rem;
+    font-size: 1.625rem;
     font-variant-numeric: tabular-nums;
   }
-  .others dd small {
-    font-size: 0.875rem;
+
+  /* 前輪・後輪 */
+  .wheels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .wheel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+  .wheel:disabled { cursor: default; }
+  .wheel .name { font-size: 1rem; color: var(--muted); }
+  .wheel .main {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 2.25rem;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+  .wheel .main small { font-size: 1rem; margin-left: 3px; color: var(--muted); }
+  .wheel .sub {
+    font-family: var(--cond);
+    font-size: 1.0625rem;
     color: var(--muted);
-    margin-left: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .save-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .btn {
+    min-height: 52px;
+    font: 600 1.0625rem var(--sans);
+    color: #fff;
+    background: var(--teal);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn.ghost {
+    color: var(--teal);
+    background: #fff;
+    border: 1px solid var(--teal);
+  }
+  .note {
+    margin: 10px 0 0;
+    font-size: 0.9375rem;
+    color: var(--muted);
   }
 
-  select:focus-visible {
+  /* 推奨空気圧 */
+  .field { margin-top: 16px; }
+  .field:first-of-type { margin-top: 0; }
+  .num {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .num input {
+    width: 7.5rem;
+    font: 500 2rem var(--cond);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .num input:focus { outline: 3px solid var(--teal); outline-offset: 1px; }
+  .num span { font-size: 1.0625rem; color: var(--muted); }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    font-size: 1.0625rem;
+    cursor: pointer;
+  }
+  .check input { width: 26px; height: 26px; accent-color: var(--teal); }
+
+  .rec {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .rec .wheel { cursor: default; min-height: 0; }
+  .warn {
+    margin: 10px 0 0;
+    font-size: 0.9375rem;
+    color: #8A4B00;
+  }
+  .warn:empty { display: none; }
+
+  button:focus-visible, .swap:focus-visible {
     outline: 3px solid var(--teal);
     outline-offset: 2px;
-  }
-
-  @media (max-width: 420px) {
-    .tool { padding: 22px 18px 26px; }
   }
 </style>
 </head>
 <body>
-  <main class="tool">
-    <h1>自転車タイヤ 空気圧 単位変換</h1>
+<main>
 
-    <div class="type">
-      <select id="type" aria-label="変換タイプ"></select>
+  <!-- 単位変換 -->
+  <section class="card" aria-labelledby="t-conv">
+    <h1 id="t-conv">空気圧 単位変換</h1>
+
+    <span class="label" id="l-from">入力する単位</span>
+    <div class="seg" id="fromSeg" role="group" aria-labelledby="l-from"></div>
+
+    <div class="swap-row">
+      <button class="swap" id="swap" type="button">⇅ 入れ替え</button>
+    </div>
+
+    <div class="unit-row">
+      <span class="label" id="l-to">変換後の単位</span>
+      <div class="seg" id="toSeg" role="group" aria-labelledby="l-to"></div>
     </div>
 
     <div class="row">
       <label class="row-head" for="value">
         <span>変換する値</span>
-        <span class="unit" id="fromUnit">psi</span>
+        <span class="unit" id="fromUnit"></span>
       </label>
       <input class="figure" id="value" type="text" inputmode="decimal"
              autocomplete="off" placeholder="0">
@@ -200,99 +328,351 @@
     <div class="row">
       <div class="row-head">
         <span>結果</span>
-        <span class="unit" id="toUnit">bar</span>
+        <span class="unit" id="toUnit"></span>
       </div>
       <output class="figure empty" id="result" for="value" aria-live="polite">—</output>
     </div>
 
     <dl class="others" id="others" aria-label="ほかの単位での値"></dl>
-  </main>
+  </section>
+
+  <!-- 前輪・後輪の保存 -->
+  <section class="card" aria-labelledby="t-save">
+    <h2 id="t-save">前輪・後輪の空気圧</h2>
+    <div class="wheels">
+      <button class="wheel" id="slot-front" type="button"></button>
+      <button class="wheel" id="slot-rear" type="button"></button>
+    </div>
+    <div class="save-row">
+      <button class="btn ghost" id="saveFront" type="button">今の値を前輪に</button>
+      <button class="btn ghost" id="saveRear" type="button">今の値を後輪に</button>
+    </div>
+    <p class="note">保存した値をタップすると、上の変換に呼び出せます。</p>
+  </section>
+
+  <!-- 推奨空気圧の目安 -->
+  <section class="card" aria-labelledby="t-rec">
+    <h2 id="t-rec">推奨空気圧の目安（ロード）</h2>
+
+    <div class="field">
+      <label class="label" for="rider">体重</label>
+      <div class="num"><input id="rider" type="text" inputmode="decimal" autocomplete="off" placeholder="65"><span>kg</span></div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="bike">車体＋装備の重さ</label>
+      <div class="num"><input id="bike" type="text" inputmode="decimal" autocomplete="off" value="9"><span>kg</span></div>
+    </div>
+
+    <div class="field">
+      <span class="label" id="l-width">タイヤ幅</span>
+      <div class="seg" id="widthSeg" role="group" aria-labelledby="l-width"></div>
+    </div>
+
+    <div class="field">
+      <span class="label" id="l-road">路面</span>
+      <div class="seg" id="roadSeg" role="group" aria-labelledby="l-road"></div>
+    </div>
+
+    <div class="field">
+      <label class="check"><input id="tubeless" type="checkbox" checked>チューブレス（レディ）</label>
+    </div>
+
+    <div class="rec">
+      <div class="wheels">
+        <div class="wheel" id="rec-front"></div>
+        <div class="wheel" id="rec-rear"></div>
+      </div>
+      <p class="warn" id="recWarn"></p>
+      <div class="save-row" style="grid-template-columns: 1fr;">
+        <button class="btn" id="recSave" type="button">この目安を前輪・後輪に保存</button>
+      </div>
+      <p class="note">あくまで目安です。タイヤとリムに書かれた最大空気圧を超えないでください。乗り心地やグリップを見ながら±5%ほどで調整してください。</p>
+    </div>
+  </section>
+
+</main>
 
 <script>
   // 各単位を kPa に換算する係数と表示桁数
   const units = {
-    psi: { label: "psi",                   kpa: 6.894757, digits: 1 },
-    bar: { label: "bar",                   kpa: 100,      digits: 2 },
-    kpa: { label: "kPa",                   kpa: 1,        digits: 0 },
-    kgf: { label: "kgf/cm²",               kpa: 98.0665,  digits: 2 },
+    psi: { label: "PSI",     kpa: 6.894757, digits: 1 },
+    bar: { label: "bar",     kpa: 100,      digits: 2 },
+    kpa: { label: "kPa",     kpa: 1,        digits: 0 },
+    kgf: { label: "kgf/cm²", kpa: 98.0665,  digits: 2 },
   };
   const order = ["psi", "bar", "kpa", "kgf"];
 
-  const typeEl = document.getElementById("type");
-  const valueEl = document.getElementById("value");
-  const resultEl = document.getElementById("result");
-  const hintEl = document.getElementById("hint");
-  const othersEl = document.getElementById("others");
-  const fromUnitEl = document.getElementById("fromUnit");
-  const toUnitEl = document.getElementById("toUnit");
-
-  // 変換タイプのプルダウンを全組み合わせで作る
-  for (const from of order) {
-    const group = document.createElement("optgroup");
-    group.label = `${units[from].label} から`;
-    for (const to of order) {
-      if (from === to) continue;
-      const opt = new Option(`${units[from].label} → ${units[to].label}`, `${from}-${to}`);
-      group.appendChild(opt);
-    }
-    typeEl.appendChild(group);
-  }
-
+  const $ = id => document.getElementById(id);
   const fmt = (n, digits) =>
     new Intl.NumberFormat("ja-JP", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+  const show = (kpa, key) => fmt(kpa / units[key].kpa, units[key].digits);
 
-  function renderOthers(kpa, from, to) {
-    othersEl.replaceChildren();
+  // 保存データ（前回の単位・前輪後輪・推奨の入力）
+  const store = {
+    get(key, fallback) {
+      try { const v = JSON.parse(localStorage.getItem("ap-" + key)); return v ?? fallback; }
+      catch { return fallback; }
+    },
+    set(key, value) { localStorage.setItem("ap-" + key, JSON.stringify(value)); },
+  };
+
+  // 入力文字列を数値に（全角・カンマ対応）。不正なら NaN
+  function parseNum(text) {
+    const raw = text.normalize("NFKC").trim().replace(/,/g, "");
+    if (!/^\+?(\d+\.?\d*|\.\d+)$/.test(raw)) return NaN;
+    return parseFloat(raw);
+  }
+
+  // ボタンの並びを作る
+  function makeSeg(el, items, current, onPick) {
+    el.replaceChildren();
+    for (const [value, text] of items) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = text;
+      b.dataset.value = value;
+      b.setAttribute("aria-pressed", String(value === current));
+      b.addEventListener("click", () => onPick(value));
+      el.appendChild(b);
+    }
+  }
+  function markSeg(el, current) {
+    for (const b of el.children) b.setAttribute("aria-pressed", String(b.dataset.value === current));
+  }
+
+  /* ---------- 単位変換 ---------- */
+
+  let from = store.get("from", "psi");
+  let to = store.get("to", "kgf");
+  if (!units[from]) from = "psi";
+  if (!units[to] || to === from) to = from === "kgf" ? "psi" : "kgf";
+  let currentKpa = null;
+
+  const unitItems = order.map(k => [k, units[k].label]);
+  makeSeg($("fromSeg"), unitItems, from, pickFrom);
+  makeSeg($("toSeg"), unitItems, to, pickTo);
+
+  function pickFrom(k) {
+    if (k === to) to = from;
+    from = k;
+    afterUnitChange();
+  }
+  function pickTo(k) {
+    if (k === from) from = to;
+    to = k;
+    afterUnitChange();
+  }
+  function afterUnitChange() {
+    markSeg($("fromSeg"), from);
+    markSeg($("toSeg"), to);
+    store.set("from", from);
+    store.set("to", to);
+    update();
+  }
+
+  $("swap").addEventListener("click", () => {
+    // 結果の値を入力側に移して単位を入れ替える
+    const keep = currentKpa;
+    [from, to] = [to, from];
+    if (keep !== null) $("value").value = show(keep, from).replace(/,/g, "");
+    afterUnitChange();
+  });
+
+  function renderOthers(kpa) {
+    const el = $("others");
+    el.replaceChildren();
     for (const key of order) {
       if (key === from || key === to) continue;
-      const u = units[key];
       const div = document.createElement("div");
       const dt = document.createElement("dt");
       const dd = document.createElement("dd");
-      dt.textContent = u.label;
-      dd.textContent = kpa === null ? "—" : fmt(kpa / u.kpa, u.digits);
-      const small = document.createElement("small");
-      small.textContent = u.label;
-      if (kpa !== null) dd.appendChild(small);
+      dt.textContent = units[key].label;
+      dd.textContent = kpa === null ? "—" : show(kpa, key);
       div.append(dt, dd);
-      othersEl.appendChild(div);
+      el.appendChild(div);
     }
   }
 
   function update() {
-    const [from, to] = typeEl.value.split("-");
-    fromUnitEl.textContent = units[from].label;
-    toUnitEl.textContent = units[to].label;
+    $("fromUnit").textContent = units[from].label;
+    $("toUnit").textContent = units[to].label;
 
-    const raw = valueEl.value.normalize("NFKC").trim().replace(/,/g, "");
+    const text = $("value").value;
+    const n = parseNum(text);
     const showEmpty = (msg, isError) => {
-      resultEl.textContent = "—";
-      resultEl.classList.add("empty");
-      hintEl.textContent = msg;
-      hintEl.classList.toggle("error", isError);
-      renderOthers(null, from, to);
+      currentKpa = null;
+      $("result").textContent = "—";
+      $("result").classList.add("empty");
+      $("hint").textContent = msg;
+      $("hint").classList.toggle("error", isError);
+      renderOthers(null);
     };
 
-    if (raw === "") {
-      showEmpty("数値を入力すると、すぐ下に結果が出ます", false);
-      return;
-    }
-    if (!/^\+?(\d+\.?\d*|\.\d+)$/.test(raw)) {
-      showEmpty("0以上の数字で入力してください（例: 90）", true);
-      return;
-    }
+    if (text.trim() === "") return showEmpty("数値を入力すると、すぐ下に結果が出ます", false);
+    if (Number.isNaN(n)) return showEmpty("0以上の数字で入力してください（例: 90）", true);
 
-    const kpa = parseFloat(raw) * units[from].kpa;
-    resultEl.textContent = fmt(kpa / units[to].kpa, units[to].digits);
-    resultEl.classList.remove("empty");
-    hintEl.textContent = "";
-    hintEl.classList.remove("error");
-    renderOthers(kpa, from, to);
+    currentKpa = n * units[from].kpa;
+    $("result").textContent = show(currentKpa, to);
+    $("result").classList.remove("empty");
+    $("hint").textContent = "";
+    $("hint").classList.remove("error");
+    renderOthers(currentKpa);
   }
 
-  typeEl.addEventListener("change", () => { update(); valueEl.focus(); });
-  valueEl.addEventListener("input", update);
+  $("value").addEventListener("input", update);
+
+  /* ---------- 前輪・後輪 ---------- */
+
+  const slots = store.get("slots", { front: null, rear: null });
+
+  function renderWheel(el, name, kpa) {
+    el.replaceChildren();
+    const n = document.createElement("span");
+    n.className = "name";
+    n.textContent = name;
+    el.appendChild(n);
+    if (kpa == null) {
+      const m = document.createElement("span");
+      m.className = "sub";
+      m.textContent = "未保存";
+      el.appendChild(m);
+      return;
+    }
+    const main = document.createElement("span");
+    main.className = "main";
+    main.textContent = show(kpa, "kgf");
+    const small = document.createElement("small");
+    small.textContent = "kgf/cm²";
+    main.appendChild(small);
+    const sub = document.createElement("span");
+    sub.className = "sub";
+    sub.textContent = `${show(kpa, "psi")} PSI ／ ${show(kpa, "bar")} bar`;
+    el.append(main, sub);
+  }
+
+  function renderSlots() {
+    renderWheel($("slot-front"), "前輪", slots.front);
+    renderWheel($("slot-rear"), "後輪", slots.rear);
+    $("slot-front").disabled = slots.front == null;
+    $("slot-rear").disabled = slots.rear == null;
+  }
+
+  function saveSlot(which, kpa) {
+    slots[which] = kpa;
+    store.set("slots", slots);
+    renderSlots();
+  }
+
+  function loadSlot(which) {
+    const kpa = slots[which];
+    if (kpa == null) return;
+    $("value").value = show(kpa, from).replace(/,/g, "");
+    update();
+    $("value").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  $("saveFront").addEventListener("click", () => {
+    if (currentKpa === null) return flashHint();
+    saveSlot("front", currentKpa);
+  });
+  $("saveRear").addEventListener("click", () => {
+    if (currentKpa === null) return flashHint();
+    saveSlot("rear", currentKpa);
+  });
+  $("slot-front").addEventListener("click", () => loadSlot("front"));
+  $("slot-rear").addEventListener("click", () => loadSlot("rear"));
+
+  function flashHint() {
+    $("hint").textContent = "先に変換する値を入力してください";
+    $("hint").classList.add("error");
+    $("value").focus();
+  }
+
+  /* ---------- 推奨空気圧の目安 ---------- */
+
+  // 前後の荷重配分（ロードバイクの乗車姿勢の目安）
+  const FRONT_SHARE = 0.48;
+  // 荷重とタイヤ幅から空気圧(PSI)を出す経験式。
+  // タイヤのつぶれ量を一定に保つ考え方をもとに、現代のチューブレス・ドライ路面で
+  // 一般的な目安（合計85kg・28mmで前約64／後約69 PSI）に合わせて係数を調整。
+  const K = 337;
+  const LOAD_EXP = 0.9;
+  const WIDTH_EXP = 1.5;
+  const WET_FACTOR = 0.93;   // ウエットは約7%下げてグリップ重視
+  const TUBE_FACTOR = 1.06;  // チューブ使用時はリム打ちパンク防止に約6%上げる
+  const HOOKLESS_MAX_PSI = 72.5;
+
+  const rec = store.get("rec", { rider: "", bike: "9", width: "28", road: "dry", tubeless: true });
+  $("rider").value = rec.rider;
+  $("bike").value = rec.bike;
+  $("tubeless").checked = rec.tubeless;
+
+  makeSeg($("widthSeg"), [["25", "25mm"], ["28", "28mm"], ["30", "30mm"], ["32", "32mm"]], rec.width, w => {
+    rec.width = w; markSeg($("widthSeg"), w); updateRec();
+  });
+  makeSeg($("roadSeg"), [["dry", "ドライ"], ["wet", "ウエット"]], rec.road, r => {
+    rec.road = r; markSeg($("roadSeg"), r); updateRec();
+  });
+
+  let recKpa = null;
+
+  function psiFor(loadKg, widthMm) {
+    let psi = K * Math.pow(loadKg, LOAD_EXP) / Math.pow(widthMm, WIDTH_EXP);
+    if (rec.road === "wet") psi *= WET_FACTOR;
+    if (!rec.tubeless) psi *= TUBE_FACTOR;
+    return psi;
+  }
+
+  function updateRec() {
+    rec.rider = $("rider").value;
+    rec.bike = $("bike").value;
+    rec.tubeless = $("tubeless").checked;
+    store.set("rec", rec);
+
+    const rider = parseNum(rec.rider);
+    const bike = parseNum(rec.bike);
+    const ok = rider >= 30 && rider <= 150 && bike >= 5 && bike <= 25;
+
+    if (!ok) {
+      recKpa = null;
+      renderWheel($("rec-front"), "前輪", null);
+      renderWheel($("rec-rear"), "後輪", null);
+      $("rec-front").querySelector(".sub").textContent = "体重を入力";
+      $("rec-rear").querySelector(".sub").textContent = "";
+      $("recWarn").textContent = rec.rider.trim() === "" ? "" : "体重は30〜150kg、車体は5〜25kgの範囲で入力してください";
+      $("recSave").disabled = true;
+      return;
+    }
+
+    const total = rider + bike;
+    const width = Number(rec.width);
+    const frontPsi = psiFor(total * FRONT_SHARE, width);
+    const rearPsi = psiFor(total * (1 - FRONT_SHARE), width);
+    recKpa = { front: frontPsi * units.psi.kpa, rear: rearPsi * units.psi.kpa };
+
+    renderWheel($("rec-front"), "前輪", recKpa.front);
+    renderWheel($("rec-rear"), "後輪", recKpa.rear);
+    $("recSave").disabled = false;
+
+    $("recWarn").textContent = rearPsi > HOOKLESS_MAX_PSI
+      ? "フックレスリムの場合は 72.5 PSI（5.0 bar）が上限です。リムの種類を確認してください。"
+      : "";
+  }
+
+  $("rider").addEventListener("input", updateRec);
+  $("bike").addEventListener("input", updateRec);
+  $("tubeless").addEventListener("change", updateRec);
+  $("recSave").addEventListener("click", () => {
+    if (!recKpa) return;
+    saveSlot("front", recKpa.front);
+    saveSlot("rear", recKpa.rear);
+    $("t-save").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
   update();
+  renderSlots();
+  updateRec();
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
