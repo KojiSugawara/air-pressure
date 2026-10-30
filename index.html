@@ -319,16 +319,6 @@
   .num input:focus { outline: 3px solid var(--teal); outline-offset: 1px; }
   .num span { font-size: 1.0625rem; color: var(--muted); }
 
-  .check {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 52px;
-    font-size: 1.0625rem;
-    cursor: pointer;
-  }
-  .check input { width: 26px; height: 26px; accent-color: var(--teal); }
-
   .rec {
     margin-top: 18px;
     padding-top: 14px;
@@ -430,7 +420,8 @@
     </div>
 
     <div class="field">
-      <label class="check"><input id="tubeless" type="checkbox" checked>チューブレス（レディ）</label>
+      <span class="label" id="l-tire">タイヤの種類</span>
+      <div class="seg" id="tireSeg" role="group" aria-labelledby="l-tire"></div>
     </div>
 
     <div class="rec">
@@ -672,16 +663,18 @@
   const LOAD_EXP = 0.9;
   const WIDTH_EXP = 1.5;
   const WET_FACTOR = 0.93;   // ウエットは約7%下げてグリップ重視
-  const TUBE_FACTOR = 1.06;  // チューブ使用時はリム打ちパンク防止に約6%上げる
+  const TUBE_FACTOR = 1.06;  // クリンチャー（チューブ使用）はリム打ちパンク防止に約6%上げる
   const HOOKLESS_MAX_PSI = 72.5;
 
   const rec = store.get("rec", { rider: "", bike: "9", width: "28", road: "dry", tubeless: true });
   $("rider").value = rec.rider;
   $("bike").value = rec.bike;
-  $("tubeless").checked = rec.tubeless;
 
   makeSeg($("widthSeg"), [["25", "25mm"], ["28", "28mm"], ["30", "30mm"], ["32", "32mm"]], rec.width, w => {
     rec.width = w; markSeg($("widthSeg"), w); updateRec();
+  });
+  makeSeg($("tireSeg"), [["tl", "チューブレス（レディ）"], ["cl", "クリンチャー"]], rec.tubeless ? "tl" : "cl", t => {
+    rec.tubeless = t === "tl"; markSeg($("tireSeg"), t); updateRec();
   });
   makeSeg($("roadSeg"), [["dry", "ドライ"], ["wet", "ウエット"]], rec.road, r => {
     rec.road = r; markSeg($("roadSeg"), r); updateRec();
@@ -699,7 +692,6 @@
   function updateRec() {
     rec.rider = $("rider").value;
     rec.bike = $("bike").value;
-    rec.tubeless = $("tubeless").checked;
     store.set("rec", rec);
 
     const rider = parseNum(rec.rider);
@@ -734,7 +726,6 @@
 
   $("rider").addEventListener("input", updateRec);
   $("bike").addEventListener("input", updateRec);
-  $("tubeless").addEventListener("change", updateRec);
   $("recSave").addEventListener("click", () => {
     if (!recKpa) return;
     saveSlot("front", recKpa.front);
