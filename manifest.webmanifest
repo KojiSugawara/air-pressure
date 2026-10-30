@@ -1,0 +1,13 @@
+{
+  "name": "自転車 空気圧 単位変換",
+  "short_name": "空気圧変換",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#DDE2E6",
+  "theme_color": "#DDE2E6",
+  "icons": [
+    { "src": "icons/air-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/air-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

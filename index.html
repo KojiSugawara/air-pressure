@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>空気圧 単位変換</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="空気圧変換">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#DDE2E6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/air-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --alu: #DDE2E6;
+    --panel: #F5F7F8;
+    --ink: #14202B;
+    --muted: #5B6773;
+    --tick: #9AA6B0;
+    --teal: #0E7C86;
+    --sans: "Barlow", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    --cond: "Barlow Condensed", "Barlow", "Hiragino Sans", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: max(32px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    background: var(--alu);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .tool {
+    width: 100%;
+    max-width: 440px;
+    background: var(--panel);
+    border-radius: 6px;
+    border: 1px solid #C6CDD3;
+    box-shadow: 0 1px 0 #fff inset, 0 18px 40px -24px rgba(20, 32, 43, 0.45);
+    padding: 28px 28px 32px;
+  }
+
+  h1 {
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* 変換タイプ */
+  .type {
+    position: relative;
+  }
+  .type select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    font: 500 1.0625rem var(--sans);
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid #C6CDD3;
+    border-radius: 4px;
+    padding: 12px 44px 12px 14px;
+    cursor: pointer;
+  }
+  .type::after {
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  /* 入力・結果の行 */
+  .row {
+    margin-top: 28px;
+  }
+  .row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .unit {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--ink);
+  }
+
+  .figure {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: clamp(2.75rem, 12vw, 3.75rem);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  input.figure {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--ink);
+    border-radius: 0;
+    padding: 0 0 4px;
+  }
+  input.figure::placeholder { color: #B7C0C8; }
+  input.figure:focus { outline: none; border-bottom-color: var(--teal); }
+
+  output.figure {
+    color: var(--teal);
+    min-height: 1.1em;
+    overflow-wrap: anywhere;
+  }
+  output.figure.empty { color: #B7C0C8; }
+
+  .hint {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+    min-height: 1.5em;
+  }
+  .hint.error { color: #B3261E; }
+
+  /* 他の単位 */
+  .others {
+    margin: 28px 0 0;
+    padding: 16px 0 0;
+    border-top: 1px solid #C6CDD3;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 16px;
+  }
+  .others div { display: flex; flex-direction: column; }
+  .others dt {
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .others dd {
+    margin: 0;
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: 1.375rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .others dd small {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  select:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 420px) {
+    .tool { padding: 22px 18px 26px; }
+  }
+</style>
+</head>
+<body>
+  <main class="tool">
+    <h1>自転車タイヤ 空気圧 単位変換</h1>
+
+    <div class="type">
+      <select id="type" aria-label="変換タイプ"></select>
+    </div>
+
+    <div class="row">
+      <label class="row-head" for="value">
+        <span>変換する値</span>
+        <span class="unit" id="fromUnit">psi</span>
+      </label>
+      <input class="figure" id="value" type="text" inputmode="decimal"
+             autocomplete="off" placeholder="0">
+      <p class="hint" id="hint" aria-live="polite"></p>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span>結果</span>
+        <span class="unit" id="toUnit">bar</span>
+      </div>
+      <output class="figure empty" id="result" for="value" aria-live="polite">—</output>
+    </div>
+
+    <dl class="others" id="others" aria-label="ほかの単位での値"></dl>
+  </main>
+
+<script>
+  // 各単位を kPa に換算する係数と表示桁数
+  const units = {
+    psi: { label: "psi",                   kpa: 6.894757, digits: 1 },
+    bar: { label: "bar",                   kpa: 100,      digits: 2 },
+    kpa: { label: "kPa",                   kpa: 1,        digits: 0 },
+    kgf: { label: "kgf/cm²",               kpa: 98.0665,  digits: 2 },
+  };
+  const order = ["psi", "bar", "kpa", "kgf"];
+
+  const typeEl = document.getElementById("type");
+  const valueEl = document.getElementById("value");
+  const resultEl = document.getElementById("result");
+  const hintEl = document.getElementById("hint");
+  const othersEl = document.getElementById("others");
+  const fromUnitEl = document.getElementById("fromUnit");
+  const toUnitEl = document.getElementById("toUnit");
+
+  // 変換タイプのプルダウンを全組み合わせで作る
+  for (const from of order) {
+    const group = document.createElement("optgroup");
+    group.label = `${units[from].label} から`;
+    for (const to of order) {
+      if (from === to) continue;
+      const opt = new Option(`${units[from].label} → ${units[to].label}`, `${from}-${to}`);
+      group.appendChild(opt);
+    }
+    typeEl.appendChild(group);
+  }
+
+  const fmt = (n, digits) =>
+    new Intl.NumberFormat("ja-JP", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+
+  function renderOthers(kpa, from, to) {
+    othersEl.replaceChildren();
+    for (const key of order) {
+      if (key === from || key === to) continue;
+      const u = units[key];
+      const div = document.createElement("div");
+      const dt = document.createElement("dt");
+      const dd = document.createElement("dd");
+      dt.textContent = u.label;
+      dd.textContent = kpa === null ? "—" : fmt(kpa / u.kpa, u.digits);
+      const small = document.createElement("small");
+      small.textContent = u.label;
+      if (kpa !== null) dd.appendChild(small);
+      div.append(dt, dd);
+      othersEl.appendChild(div);
+    }
+  }
+
+  function update() {
+    const [from, to] = typeEl.value.split("-");
+    fromUnitEl.textContent = units[from].label;
+    toUnitEl.textContent = units[to].label;
+
+    const raw = valueEl.value.normalize("NFKC").trim().replace(/,/g, "");
+    const showEmpty = (msg, isError) => {
+      resultEl.textContent = "—";
+      resultEl.classList.add("empty");
+      hintEl.textContent = msg;
+      hintEl.classList.toggle("error", isError);
+      renderOthers(null, from, to);
+    };
+
+    if (raw === "") {
+      showEmpty("数値を入力すると、すぐ下に結果が出ます", false);
+      return;
+    }
+    if (!/^\+?(\d+\.?\d*|\.\d+)$/.test(raw)) {
+      showEmpty("0以上の数字で入力してください（例: 90）", true);
+      return;
+    }
+
+    const kpa = parseFloat(raw) * units[from].kpa;
+    resultEl.textContent = fmt(kpa / units[to].kpa, units[to].digits);
+    resultEl.classList.remove("empty");
+    hintEl.textContent = "";
+    hintEl.classList.remove("error");
+    renderOthers(kpa, from, to);
+  }
+
+  typeEl.addEventListener("change", () => { update(); valueEl.focus(); });
+  valueEl.addEventListener("input", update);
+  update();
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
+</body>
+</html>
