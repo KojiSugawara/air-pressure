@@ -1,10 +1,11 @@
 // オフラインでも使えるように、ページ一式とフォントをキャッシュする
-const CACHE = "air-pressure-v4";
+const CACHE = "air-pressure-v5";
 const FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icons/air-180.png",
+  "./icons/air-192.png",
   "./icons/air-512.png",
 ];
 
