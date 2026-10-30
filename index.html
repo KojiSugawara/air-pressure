@@ -9,6 +9,15 @@
 <meta name="apple-mobile-web-app-title" content="空気圧変換">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#DDE2E6">
+<script>
+  // 画面が描かれる前にテーマを決める（保存した設定 → なければiPhoneの設定）
+  (function () {
+    let t = null;
+    try { t = JSON.parse(localStorage.getItem("ap-theme")); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/air-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +31,32 @@
     --muted: #5B6773;
     --line: #C6CDD3;
     --teal: #0E7C86;
+    --field: #fff;
+    --faint: #B7C0C8;
+    --on-ink: #fff;
+    --on-teal: #fff;
+    --error: #B3261E;
+    --warn: #8A4B00;
+    --hilite: #fff;
     --sans: "Barlow", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
     --cond: "Barlow Condensed", "Barlow", "Hiragino Sans", system-ui, sans-serif;
+  }
+
+  :root[data-theme="dark"] {
+    --alu: #0F151B;
+    --panel: #1A232C;
+    --ink: #E6EBEF;
+    --muted: #9AA7B2;
+    --line: #33414D;
+    --teal: #3FB8C2;
+    --field: #222D37;
+    --faint: #4E5C68;
+    --on-ink: #0F151B;
+    --on-teal: #0F151B;
+    --error: #FF8A80;
+    --warn: #F2B866;
+    --hilite: rgba(255, 255, 255, 0.04);
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
@@ -51,12 +84,31 @@
     background: var(--panel);
     border-radius: 8px;
     border: 1px solid var(--line);
-    box-shadow: 0 1px 0 #fff inset, 0 18px 40px -24px rgba(20, 32, 43, 0.45);
+    box-shadow: 0 1px 0 var(--hilite) inset, 0 18px 40px -24px rgba(20, 32, 43, 0.45);
     padding: 22px 20px 24px;
   }
 
-  h1 {
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     margin: 0 0 16px;
+  }
+  .theme {
+    flex: none;
+    min-height: 44px;
+    padding: 0 14px;
+    font: 500 1rem var(--sans);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    cursor: pointer;
+  }
+
+  h1 {
+    margin: 0;
     font-size: 1.375rem;
     font-weight: 600;
   }
@@ -84,7 +136,7 @@
     min-height: 54px;
     font: 600 1.25rem var(--cond);
     color: var(--ink);
-    background: #fff;
+    background: var(--field);
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 0 4px;
@@ -94,7 +146,7 @@
   .seg button[aria-pressed="true"] {
     background: var(--ink);
     border-color: var(--ink);
-    color: #fff;
+    color: var(--on-ink);
   }
 
   .unit-row { margin-top: 14px; }
@@ -147,7 +199,7 @@
     border-radius: 0;
     padding: 0 0 4px;
   }
-  input.figure::placeholder { color: #B7C0C8; }
+  input.figure::placeholder { color: var(--faint); }
   input.figure:focus { outline: none; border-bottom-color: var(--teal); }
 
   output.figure {
@@ -155,7 +207,7 @@
     min-height: 1.1em;
     overflow-wrap: anywhere;
   }
-  output.figure.empty { color: #B7C0C8; }
+  output.figure.empty { color: var(--faint); }
 
   .hint {
     margin: 6px 0 0;
@@ -163,7 +215,7 @@
     color: var(--muted);
     min-height: 1.5em;
   }
-  .hint.error { color: #B3261E; }
+  .hint.error { color: var(--error); }
 
   .others {
     margin: 18px 0 0;
@@ -197,7 +249,7 @@
     width: 100%;
     min-height: 120px;
     padding: 12px 14px;
-    background: #fff;
+    background: var(--field);
     border: 1px solid var(--line);
     border-radius: 8px;
     color: var(--ink);
@@ -229,7 +281,7 @@
   .btn {
     min-height: 52px;
     font: 600 1.0625rem var(--sans);
-    color: #fff;
+    color: var(--on-teal);
     background: var(--teal);
     border: 0;
     border-radius: 6px;
@@ -237,7 +289,7 @@
   }
   .btn.ghost {
     color: var(--teal);
-    background: #fff;
+    background: var(--field);
     border: 1px solid var(--teal);
   }
   .note {
@@ -259,7 +311,7 @@
     font: 500 2rem var(--cond);
     font-variant-numeric: tabular-nums;
     color: var(--ink);
-    background: #fff;
+    background: var(--field);
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 4px 10px;
@@ -286,7 +338,7 @@
   .warn {
     margin: 10px 0 0;
     font-size: 0.9375rem;
-    color: #8A4B00;
+    color: var(--warn);
   }
   .warn:empty { display: none; }
 
@@ -301,7 +353,10 @@
 
   <!-- 単位変換 -->
   <section class="card" aria-labelledby="t-conv">
-    <h1 id="t-conv">空気圧 単位変換</h1>
+    <div class="head">
+      <h1 id="t-conv">空気圧 単位変換</h1>
+      <button class="theme" id="theme" type="button"></button>
+    </div>
 
     <span class="label" id="l-from">入力する単位</span>
     <div class="seg" id="fromSeg" role="group" aria-labelledby="l-from"></div>
@@ -440,6 +495,23 @@
   function markSeg(el, current) {
     for (const b of el.children) b.setAttribute("aria-pressed", String(b.dataset.value === current));
   }
+
+  /* ---------- ライト／ダーク切り替え ---------- */
+
+  const themeColors = { light: "#DDE2E6", dark: "#0F151B" };
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    document.querySelector('meta[name="theme-color"]').content = themeColors[t];
+    // ボタンには切り替え先を表示
+    $("theme").textContent = t === "dark" ? "☀️ ライト" : "🌙 ダーク";
+    $("theme").setAttribute("aria-label", t === "dark" ? "ライトモードに切り替え" : "ダークモードに切り替え");
+  }
+  applyTheme(document.documentElement.dataset.theme);
+  $("theme").addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    store.set("theme", next);
+    applyTheme(next);
+  });
 
   /* ---------- 単位変換 ---------- */
 
