@@ -332,6 +332,81 @@
   }
   .warn:empty { display: none; }
 
+  /* 詳細設定 */
+  details.more {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--field);
+  }
+  details.more summary {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  details.more summary::-webkit-details-marker { display: none; }
+  details.more summary::after {
+    content: "＋";
+    margin-left: auto;
+    color: var(--muted);
+  }
+  details.more[open] summary::after { content: "−"; }
+  .more-body { padding: 0 14px 16px; }
+  .more-body > .field-hint { margin: 0 0 16px; }
+  /* 日本語のボタンは少し小さい文字で1行に収める */
+  .seg.jp button { font: 600 1rem var(--sans); padding: 0 2px; }
+  .more-body .num input { background: var(--panel); }
+  .more-body .seg button { background: var(--panel); }
+  .more-body .seg button[aria-pressed="true"] { background: var(--ink); }
+  .field-hint {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .field-hint.error { color: var(--error); }
+
+  /* 安全チェック */
+  .safety {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--field);
+  }
+  .safety h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .safe-row { padding: 8px 0; }
+  .safe-row + .safe-row { border-top: 1px solid var(--line); }
+  .safe-head {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .safe-wheel { font-size: 1rem; color: var(--muted); flex: none; }
+  .safe-status { font-weight: 600; font-size: 1.0625rem; }
+  .safe-status.over { color: var(--error); }
+  .safe-status.unknown { color: var(--warn); }
+  .safe-status.within { color: var(--ink); }
+  .safe-detail {
+    margin: 2px 0 0;
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .safe-note {
+    margin: 8px 0 0;
+    font-size: 0.9375rem;
+    color: var(--warn);
+  }
+  .safe-note:empty { display: none; }
+
   button:focus-visible, .swap:focus-visible {
     outline: 3px solid var(--teal);
     outline-offset: 2px;
@@ -421,8 +496,37 @@
 
     <div class="field">
       <span class="label" id="l-tire">タイヤの種類</span>
-      <div class="seg" id="tireSeg" role="group" aria-labelledby="l-tire"></div>
+      <div class="seg jp" id="tireSeg" role="group" aria-labelledby="l-tire"></div>
     </div>
+
+    <details class="more" id="more">
+      <summary>詳細設定（安全チェック）</summary>
+      <div class="more-body">
+        <p class="field-hint">入力しても推奨空気圧の数値は変わりません。上限を超えていないかの確認だけに使います。</p>
+
+        <div class="field">
+          <span class="label" id="l-rim">リム構造</span>
+          <div class="seg jp" id="rimSeg" role="group" aria-labelledby="l-rim"></div>
+        </div>
+
+        <div class="field">
+          <span class="label" id="l-maxunit">最大空気圧の単位</span>
+          <div class="seg" id="maxUnitSeg" role="group" aria-labelledby="l-maxunit"></div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="rimMax">リム最大空気圧（リム・ホイールの表示）</label>
+          <div class="num"><input id="rimMax" type="text" inputmode="decimal" autocomplete="off" placeholder="未入力"><span class="max-unit"></span></div>
+          <p class="field-hint" id="rimMaxHint"></p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="tireMax">タイヤ最大空気圧（タイヤ側面の表示）</label>
+          <div class="num"><input id="tireMax" type="text" inputmode="decimal" autocomplete="off" placeholder="未入力"><span class="max-unit"></span></div>
+          <p class="field-hint" id="tireMaxHint"></p>
+        </div>
+      </div>
+    </details>
 
     <div class="rec">
       <div class="wheels">
@@ -430,6 +534,12 @@
         <div class="wheel" id="rec-rear"></div>
       </div>
       <p class="warn" id="recWarn"></p>
+      <div class="safety" id="safety" aria-live="polite">
+        <h3>安全チェック</h3>
+        <div class="safe-row" id="safe-front"></div>
+        <div class="safe-row" id="safe-rear"></div>
+        <p class="safe-note" id="safeNote"></p>
+      </div>
       <div class="save-row" style="grid-template-columns: 1fr;">
         <button class="btn" id="recSave" type="button">この目安を前輪・後輪に保存</button>
       </div>
@@ -664,11 +774,26 @@
   const WIDTH_EXP = 1.5;
   const WET_FACTOR = 0.93;   // ウエットは約7%下げてグリップ重視
   const TUBE_FACTOR = 1.06;  // クリンチャー（チューブ使用）はリム打ちパンク防止に約6%上げる
-  const HOOKLESS_MAX_PSI = 72.5;
+  const HOOKLESS_MAX_KPA = 500;  // フックレスの一般的な上限の目安 5.0 bar（ETRTO）
 
-  const rec = store.get("rec", { rider: "", bike: "9", width: "28", road: "dry", tubeless: true });
+  const rec = Object.assign(
+    { rider: "", bike: "9", width: "28", road: "dry", tubeless: true,
+      rimType: "unknown", rimMax: "", tireMax: "", maxUnit: "bar" },
+    store.get("rec", {})
+  );
   $("rider").value = rec.rider;
   $("bike").value = rec.bike;
+  $("rimMax").value = rec.rimMax;
+  $("tireMax").value = rec.tireMax;
+  // 詳細設定に何か入っていれば最初から開いておく
+  $("more").open = rec.rimType !== "unknown" || rec.rimMax !== "" || rec.tireMax !== "";
+
+  makeSeg($("rimSeg"), [["hooked", "フック付き"], ["hookless", "フックレス"], ["unknown", "不明"]], rec.rimType, t => {
+    rec.rimType = t; markSeg($("rimSeg"), t); updateRec();
+  });
+  makeSeg($("maxUnitSeg"), [["bar", "bar"], ["psi", "PSI"], ["kgf", "kgf/cm²"]], rec.maxUnit, u => {
+    rec.maxUnit = u; markSeg($("maxUnitSeg"), u); updateRec();
+  });
 
   makeSeg($("widthSeg"), [["25", "25mm"], ["28", "28mm"], ["30", "30mm"], ["32", "32mm"]], rec.width, w => {
     rec.width = w; markSeg($("widthSeg"), w); updateRec();
@@ -689,9 +814,104 @@
     return psi;
   }
 
+  // 最大空気圧の入力を kPa に。未入力は null、不正な値は NaN
+  function readMax(id) {
+    const text = $(id).value;
+    const hint = $(id + "Hint");
+    hint.classList.remove("error");
+    hint.textContent = "";
+    if (text.trim() === "") return null;
+    const n = parseNum(text);
+    const kpa = n * units[rec.maxUnit].kpa;
+    if (Number.isNaN(n) || kpa < 100 || kpa > 1500) {
+      hint.textContent = "正しい値を入力してください（例：5 bar、73 PSI）。この値はチェックに使いません";
+      hint.classList.add("error");
+      return NaN;
+    }
+    hint.textContent = `＝ ${show(kpa, "bar")} bar ／ ${show(kpa, "psi")} PSI ／ ${show(kpa, "kgf")} kgf/cm²`;
+    return kpa;
+  }
+
+  const limitText = kpa => `${show(kpa, "bar")} bar（${show(kpa, "psi")} PSI）`;
+
+  // 1輪分の安全チェック。推奨値そのものは変えない
+  function checkWheel(kpa, rimMax, tireMax) {
+    const limits = [];
+    if (rimMax > 0) limits.push({ kpa: rimMax, label: "リムの最大空気圧" });
+    if (tireMax > 0) limits.push({ kpa: tireMax, label: "タイヤの最大空気圧" });
+    if (rec.rimType === "hookless") limits.push({ kpa: HOOKLESS_MAX_KPA, label: "フックレスの一般的な上限の目安" });
+    // いちばん低い上限で判定（同じ値ならメーカー指定を優先して表示）
+    const limit = limits.reduce((a, b) => (b.kpa < a.kpa ? b : a), limits[0]);
+
+    if (limit && kpa > limit.kpa) {
+      return {
+        cls: "over", status: "⚠ 上限超過",
+        detail: `${limit.label} ${limitText(limit.kpa)} を超えています。推奨値は自動では変わりません。空気圧は上限以下にしてください。`,
+      };
+    }
+
+    const missing = [];
+    if (rec.rimType === "unknown") missing.push("リム構造");
+    if (!(rimMax > 0)) missing.push("リム最大空気圧");
+    if (!(tireMax > 0)) missing.push("タイヤ最大空気圧");
+
+    const parts = [];
+    if (limit) parts.push(`${limit.label} ${limitText(limit.kpa)} 以下です。`);
+    if (missing.length) parts.push(`未確認：${missing.join("・")}。`);
+    if (rec.rimType === "unknown" && kpa > HOOKLESS_MAX_KPA) parts.push("フックレスリムの場合は、一般的な上限の目安 5.0 bar を超えています。");
+    if (rec.rimType === "hookless") parts.push("タイヤとリムの適合確認が必要です。");
+
+    if (missing.length || rec.rimType === "hookless") {
+      return { cls: "unknown", status: "安全性未確認", detail: parts.join("") };
+    }
+    return {
+      cls: "within", status: "入力した上限以下",
+      detail: `${limit.label} ${limitText(limit.kpa)} 以下です。最終的には製品の表示・説明書で確認してください。`,
+    };
+  }
+
+  function renderSafety(el, name, result) {
+    el.replaceChildren();
+    const head = document.createElement("div");
+    head.className = "safe-head";
+    const w = document.createElement("span");
+    w.className = "safe-wheel";
+    w.textContent = name;
+    const st = document.createElement("span");
+    st.className = "safe-status " + (result ? result.cls : "");
+    st.textContent = result ? result.status : "—";
+    head.append(w, st);
+    el.appendChild(head);
+    if (result) {
+      const d = document.createElement("p");
+      d.className = "safe-detail";
+      d.textContent = result.detail;
+      el.appendChild(d);
+    }
+  }
+
+  function updateSafety() {
+    for (const el of document.querySelectorAll(".max-unit")) el.textContent = units[rec.maxUnit].label;
+    const rimMax = readMax("rimMax");
+    const tireMax = readMax("tireMax");
+
+    renderSafety($("safe-front"), "前輪", recKpa && checkWheel(recKpa.front, rimMax, tireMax));
+    renderSafety($("safe-rear"), "後輪", recKpa && checkWheel(recKpa.rear, rimMax, tireMax));
+
+    const notes = [];
+    if (rec.rimType === "hookless") {
+      notes.push("フックレスリムには、リムメーカーが適合を認めたチューブレス対応（TLR/TLE）タイヤのみ使えます。チューブを入れる場合も同じです。リム・タイヤメーカーの適合表で確認してください。");
+      if (!rec.tubeless) notes.push("「クリンチャー」を選択中です。チューブを入れて使う場合も、フックレスリムではタイヤがチューブレス対応（TLR/TLE）である必要があります。");
+    }
+    $("safeNote").textContent = notes.join("\n");
+    $("safeNote").style.whiteSpace = "pre-line";
+  }
+
   function updateRec() {
     rec.rider = $("rider").value;
     rec.bike = $("bike").value;
+    rec.rimMax = $("rimMax").value;
+    rec.tireMax = $("tireMax").value;
     store.set("rec", rec);
 
     const rider = parseNum(rec.rider);
@@ -706,6 +926,7 @@
       $("rec-rear").querySelector(".sub").textContent = "";
       $("recWarn").textContent = rec.rider.trim() === "" ? "" : "体重は30〜150kg、車体は5〜25kgの範囲で入力してください";
       $("recSave").disabled = true;
+      updateSafety();
       return;
     }
 
@@ -719,13 +940,15 @@
     renderWheel($("rec-rear"), "後輪", recKpa.rear);
     $("recSave").disabled = false;
 
-    $("recWarn").textContent = rearPsi > HOOKLESS_MAX_PSI
-      ? "フックレスリムの場合は 72.5 PSI（5.0 bar）が上限です。リムの種類を確認してください。"
-      : "";
+    // フックレス上限などの注意は安全チェック欄に表示
+    $("recWarn").textContent = "";
+    updateSafety();
   }
 
   $("rider").addEventListener("input", updateRec);
   $("bike").addEventListener("input", updateRec);
+  $("rimMax").addEventListener("input", updateRec);
+  $("tireMax").addEventListener("input", updateRec);
   $("recSave").addEventListener("click", () => {
     if (!recKpa) return;
     saveSlot("front", recKpa.front);
