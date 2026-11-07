@@ -1,5 +1,5 @@
 // オフラインでも使えるように、ページ一式とフォントをキャッシュする
-const CACHE = "air-pressure-v6";
+const CACHE = "air-pressure-v7";
 const FILES = [
   "./",
   "./index.html",
