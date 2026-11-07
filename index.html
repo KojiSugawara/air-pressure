@@ -134,6 +134,7 @@
   }
   .seg button {
     min-height: 54px;
+    white-space: pre-line;
     font: 600 1.25rem var(--cond);
     color: var(--ink);
     background: var(--field);
@@ -267,6 +268,10 @@
   }
   .wheel .main small { font-size: 1rem; margin-left: 3px; color: var(--muted); }
   .wheel .sub {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: auto;
     font-family: var(--cond);
     font-size: 1.0625rem;
     color: var(--muted);
@@ -714,13 +719,17 @@
     }
     const main = document.createElement("span");
     main.className = "main";
-    main.textContent = show(kpa, "kgf");
+    main.textContent = show(kpa, "psi");
     const small = document.createElement("small");
-    small.textContent = "kgf/cm²";
+    small.textContent = "PSI";
     main.appendChild(small);
     const sub = document.createElement("span");
     sub.className = "sub";
-    sub.textContent = `${show(kpa, "psi")} PSI ／ ${show(kpa, "bar")} bar`;
+    const left = document.createElement("span");
+    left.textContent = `${show(kpa, "bar")} bar`;
+    const right = document.createElement("span");
+    right.textContent = `${show(kpa, "kgf")} kgf/cm²`;
+    sub.append(left, right);
     el.append(main, sub);
   }
 
@@ -798,7 +807,7 @@
   makeSeg($("widthSeg"), [["25", "25mm"], ["28", "28mm"], ["30", "30mm"], ["32", "32mm"]], rec.width, w => {
     rec.width = w; markSeg($("widthSeg"), w); updateRec();
   });
-  makeSeg($("tireSeg"), [["tl", "チューブレス（レディ）"], ["cl", "クリンチャー"]], rec.tubeless ? "tl" : "cl", t => {
+  makeSeg($("tireSeg"), [["tl", "チューブレス\n（レディ）"], ["cl", "クリンチャー"]], rec.tubeless ? "tl" : "cl", t => {
     rec.tubeless = t === "tl"; markSeg($("tireSeg"), t); updateRec();
   });
   makeSeg($("roadSeg"), [["dry", "ドライ"], ["wet", "ウエット"]], rec.road, r => {
@@ -922,7 +931,7 @@
       recKpa = null;
       renderWheel($("rec-front"), "前輪", null);
       renderWheel($("rec-rear"), "後輪", null);
-      $("rec-front").querySelector(".sub").textContent = "体重を入力";
+      $("rec-front").querySelector(".sub").textContent = "";
       $("rec-rear").querySelector(".sub").textContent = "";
       $("recWarn").textContent = rec.rider.trim() === "" ? "" : "体重は30〜150kg、車体は5〜25kgの範囲で入力してください";
       $("recSave").disabled = true;
